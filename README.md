@@ -50,3 +50,7 @@ reported national inventories.
 ## Expected run time
 
 About 10 hours on a normal desktop computer for the complete database.
+The code runs on the complete real database provided in [input]. To verify the pipeline quickly, set `B = 50` and
+`N_SIMULATIONS = 200` at the top of `Main_code.py`, which produces the same set of
+output files in <30 minutes. Restore `B = 1000` and `N_SIMULATIONS = 10000`
+for the published results.
