@@ -37,13 +37,15 @@ the published results already in place. No separate demo dataset is needed.
 
 ## Expected output
 
-`Main_code.py` writes emissions with 95% prediction intervals at global,
-continental, income-group, national, regional and city level to `country_results/`,
-together with the BOD and TN loads entering secondary treatment and the
-city- and country-level reduction rates and BOD-to-sludge ratios.
+All results are written to `output/`.
 
-`Analysis_code.py` writes the aggregated tables and the comparison with the
-reported national inventories to `Average_result/`.
+`Main_code.py` produces emissions with 95% prediction intervals at global,
+continental, income-group, national, regional and city level, together with the
+BOD and TN loads entering secondary treatment and the city- and country-level
+reduction rates and BOD-to-sludge ratios.
+
+`Analysis_code.py` produces the aggregated tables and the comparison with the
+reported national inventories.
 
 ## Expected run time
 
