@@ -121,11 +121,11 @@ def get_bucket_params(bucket):
         base.update({'max_depth': 8, 'n_estimators': 100, 'learning_rate': 0.10,
                      'min_child_weight': 5, 'reg_lambda': 5})
     elif 'medium' in bucket:
-        base.update({'max_depth': 5, 'n_estimators': 200, 'learning_rate': 0.05,
-                     'min_child_weight': 3, 'reg_lambda': 1})
+        base.update({'max_depth': 5, 'n_estimators': 100, 'learning_rate': 0.10,
+                     'min_child_weight': 1, 'reg_lambda': 1})
     else:
         base.update({'max_depth': 6, 'n_estimators': 100, 'learning_rate': 0.10,
-                     'min_child_weight': 3, 'reg_lambda': 3})
+                     'min_child_weight': 1, 'reg_lambda': 1})
     return base
 
 

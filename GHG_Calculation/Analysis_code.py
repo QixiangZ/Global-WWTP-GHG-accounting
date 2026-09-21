@@ -14,7 +14,7 @@ import pandas as pd
 from paths import OUTPUT_DIR, inp
 
 # --- input ---------------------------------------------------------------
-INPUT_FILE = inp("Region-resolved pollutant flows and GHG emissions.xlsx")
+INPUT_FILE = inp("Region_resolved pollutant flows and GHG emissions.xlsx")
 INPUT_SHEET = "GHG Calculation"
 SOURCE_DATA_DIR = inp("CH4_N2O_DATA_From_EPA")
 
@@ -34,7 +34,7 @@ CH4_COLUMNS = ['CH4_WWTP', 'CH4_Sewer', 'CH4_unsafelytreated', 'CH4_eff', 'CH4_T
 N2O_COLUMNS = ['N2O_WWTP', 'N2O_unsafelytreated', 'N2O_eff', 'N2O_Total']
 SUM_COLUMNS = CH4_COLUMNS + N2O_COLUMNS
 
-WEIGHTED_COLUMNS = ['CH4_Indensity', 'N2O_Indensity']
+WEIGHTED_COLUMNS = ['CH4_Intensity', 'N2O_Intensity']
 ATTR_COLUMNS = ['Continent', INCOME_COL]
 
 HEADLINE = ['GHG_WWTP', 'CH4_WWTP', 'N2O_WWTP']

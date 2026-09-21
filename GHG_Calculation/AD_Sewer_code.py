@@ -45,8 +45,8 @@ FEATURE_COLS = [
 ]
 
 MODEL_PARAMS = dict(n_estimators=2000, max_depth=6, learning_rate=0.10,
-                    subsample=0.8, colsample_bytree=0.8, min_child_weight=3,
-                    reg_lambda=3, reg_alpha=1, gamma=0.1)
+                    subsample=0.8, colsample_bytree=0.8, min_child_weight=1,
+                    reg_lambda=1, reg_alpha=1, gamma=0.1)
 
 TARGET_COUNTRIES = [
     'Austria', 'Belgium', 'Denmark', 'Finland', 'France', 'Germany', 'Greece',
@@ -108,7 +108,8 @@ def balanced_weights(y):
 
 
 def train_digestion_model(observed):
-    """Train the anaerobic-digestion classifier and report test performance."""
+    """Train the anaerobic-digestion classifier, evaluate it on a held-out split,
+    then refit on all labelled plants for prediction."""
     print("\n" + "=" * 70)
     print("Part 1: anaerobic digestion classifier")
     print("=" * 70)
@@ -117,8 +118,7 @@ def train_digestion_model(observed):
     print(f"  anaerobic {int((observed['label'] == 1).sum())} | "
           f"non-anaerobic {int((observed['label'] == 0).sum())}")
 
-    medians = observed[FEATURE_COLS].median(numeric_only=True)
-    X_all = observed[FEATURE_COLS].fillna(medians)
+    X_all = observed[FEATURE_COLS]
     y_all = observed['label'].values
 
     X_tmp, X_test, y_tmp, y_test = train_test_split(
@@ -126,18 +126,30 @@ def train_digestion_model(observed):
     X_train, X_val, y_train, y_val = train_test_split(
         X_tmp, y_tmp, test_size=0.25, random_state=RANDOM_SEED, stratify=y_tmp)
 
-    model = XGBClassifier(**MODEL_PARAMS, early_stopping_rounds=50,
-                          eval_metric='logloss', random_state=RANDOM_SEED, n_jobs=-1)
-    model.fit(X_train, y_train, sample_weight=balanced_weights(y_train),
-              eval_set=[(X_val, y_val)], verbose=100)
-    print(f"  best iteration: {model.best_iteration}")
+    split_medians = X_train.median(numeric_only=True)
+    X_train = X_train.fillna(split_medians)
+    X_val = X_val.fillna(split_medians)
+    X_test = X_test.fillna(split_medians)
 
-    y_pred = model.predict(X_test)
-    y_prob = model.predict_proba(X_test)[:, 1]
-    print("\n  test set")
+    eval_model = XGBClassifier(**MODEL_PARAMS, early_stopping_rounds=50,
+                               eval_metric='logloss', random_state=RANDOM_SEED, n_jobs=-1)
+    eval_model.fit(X_train, y_train, sample_weight=balanced_weights(y_train),
+                   eval_set=[(X_val, y_val)], verbose=100)
+    n_rounds = int(eval_model.best_iteration) + 1
+    print(f"  best iteration {eval_model.best_iteration} -> {n_rounds} trees")
+
+    y_pred = eval_model.predict(X_test)
+    y_prob = eval_model.predict_proba(X_test)[:, 1]
+    print(f"\n  held-out test set ({len(X_test)} plants), model trained on {len(X_train)}")
     print(classification_report(y_test, y_pred,
                                 target_names=[NEGATIVE_VALUE, POSITIVE_VALUE]))
     print(f"  AUC-ROC: {roc_auc_score(y_test, y_prob):.4f}")
+
+    medians = X_all.median(numeric_only=True)
+    model = XGBClassifier(**{**MODEL_PARAMS, 'n_estimators': n_rounds},
+                          eval_metric='logloss', random_state=RANDOM_SEED, n_jobs=-1)
+    model.fit(X_all.fillna(medians), y_all, sample_weight=balanced_weights(y_all))
+    print(f"\n  prediction model refitted on all {len(X_all)} labelled plants, {n_rounds} trees")
 
     imp = pd.Series(model.feature_importances_, index=FEATURE_COLS).sort_values(ascending=False)
     print("\n  feature importance")
